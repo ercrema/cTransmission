@@ -6,7 +6,7 @@ Authors@R: c(person("Enrico","Crema", role=c("aut","cre"),email="enrico.crema@gm
 	     person("Anne","Kandler", role=c("aut"),email="anne_kandler@eva.mpg.de"))
 Description: This package provides a framework for analysing cultural frequency data using Approximate Bayesian Computation. 
 Depends: R (>= 3.3.0)
-Imports: sp,stats,graphics,grDevices,utils,doParallel,foreach,parallel,knitr
+Imports: sp,stats,graphics,grDevices,utils,doParallel,foreach,parallel,LaplacesDemon,knitr
 Suggests: 
 License: GPL (>= 2)
 Encoding: UTF-8
