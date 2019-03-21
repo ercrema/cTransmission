@@ -26,4 +26,3 @@ This functions computes expected frequencies of extant cultural variants given a
 \details{
 Transmission model can be either the one provided by \code{cTransmission} or custom generated. Custom generated model should be written as a function which outputs the probability of selecting each variant. The function would require at least the arguments x (the raw frequencies of each variant), k (the number of variants), and mu (the mutation rate), plus additional parameters.
 }
-\keyword{internal}

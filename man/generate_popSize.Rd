@@ -22,4 +22,3 @@ Estimates population sizes from observed sample sizes given the sample fraction 
 \details{
 The function estimates population sizes for each timestep (from the first time-step to the start of the final time-step )
 }
-\keyword{internal}

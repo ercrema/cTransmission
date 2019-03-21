@@ -1,5 +1,5 @@
 #' @import stats
-#' @keywords internal
+#' @export
 
 instances<-function(x,variants)    
 {

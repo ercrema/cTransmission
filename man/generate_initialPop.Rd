@@ -19,4 +19,3 @@ A matrix with relative frequencies of each variant (column) across \code{nsim} s
 \description{
 The function estimates the population relative frequencies of cultural variants given observed raw frequencies and alpha priors.
 }
-\keyword{internal}

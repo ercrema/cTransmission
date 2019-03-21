@@ -9,7 +9,7 @@
 #' @details Transmission model can be either the one provided by \code{cTransmission} or custom generated. Custom generated model should be written as a function which outputs the probability of selecting each variant. The function would require at least the arguments x (the raw frequencies of each variant), k (the number of variants), and mu (the mutation rate), plus additional parameters. 
 #' @import stats
 #' @import utils 
-#' @keywords internal
+#' @export
 
 
 

@@ -5,7 +5,7 @@
 #' @param sVariance variance of the ratio \eqn{s} between sample size and population size.
 #' @details The function estimates population sizes for each timestep (from the first time-step to the start of the final time-step )
 #' @return A vector containing the population size for each time-step.
-#' @keywords internal
+#' @export
 
 
 generate_popSize<-function(x, sMean, sVariance)

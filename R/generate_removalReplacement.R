@@ -3,7 +3,7 @@
 #' @param N vector of population sizes (user defined or created using \code{generate_N})
 #' @param r population replacement rate
 #' @return A data.frame containing the number of variants to be removed (u) and added (v) to the population at each time step.
-#' @keywords internal
+#' @export
 
 generate_removalReplacement <- function(x, N, r)
 {

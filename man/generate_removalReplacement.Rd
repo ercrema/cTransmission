@@ -19,4 +19,3 @@ A data.frame containing the number of variants to be removed (u) and added (v) t
 \description{
 Computes the number of samples to be removed at each transition.
 }
-\keyword{internal}

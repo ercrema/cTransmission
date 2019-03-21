@@ -4,7 +4,7 @@
 #' @param nsim Number of repetitions. Default is 1. 
 #' @param alpha Dirichlet \eqn{\alpha} parameter. Default is 1.
 #' @return A matrix with relative frequencies of each variant (column) across \code{nsim} simulations (rows).
-#' @keywords internal
+#' @export
 
 generate_initialPop<-function(x, nsim=1, alpha=1)
 {

@@ -1,5 +1,5 @@
 #' @import stats
-#' @keywords internal
+#' @export
 
 
 hpdi <- function (obj,prob = 0.95) 
