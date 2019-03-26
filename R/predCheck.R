@@ -12,7 +12,8 @@
 
 predCheck <- function(x,sim.model,posterior,nsim=NULL)
 {
-	if (nsim > nrow(posterior)|is.null(nsim))
+	if (is.null(nsim)){nsim = nrow(posterior)}
+	if (nsim > nrow(posterior))
 	{
 		nsim = nrow(posterior) 
 		warning(paste0("Number of simulations undefined or higher than the posterior sample size. nsim has been set to ", nsim))

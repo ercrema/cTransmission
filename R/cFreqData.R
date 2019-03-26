@@ -3,7 +3,6 @@
 #' @param x A matrix storing the frequency of each cultural variant (columns) at each sampling phase (rows).
 #' @param timestamp A vector containing the timestamp (i.e. last timestep) of each sampling phase.
 #' @param duration A vector containing the durations of the sampling phase (except the first phase) calculated in number of timesteps. If a single value is supplied the durations will be assumed to be the same for all phases. 
-#' @details 
 #' @return An object of class cFreqData.
 #' @examples
 #' dt=as.matrix(data.frame(var1=c(0,10,15),var2=c(20,18,0),var3=c(0,0,4),var4=c(32,20,18)))

@@ -5,7 +5,7 @@
 #' @param var.names Variant names supplied with the same order as the observed data.
 #' @param phase.names Names of the sampling phases
 #' @param index Integer value indicating which sampling phase to display counting from the second observed sampling phase.
-#' @param hpdi Higher posterior interval size.
+#' @param ppi Prediction percentile interval. Default is 0.95.
 #' @seealso \code{\link{predCheck}}
 #' @import stats
 #' @import grDevices
@@ -15,7 +15,7 @@
 #' @export  
 
 
-plot.pcheck <- function(x,var.names=NULL,phase.names=NULL,index=1,hpdi=0.95)
+plot.pcheck <- function(x,var.names=NULL,phase.names=NULL,index=1,ppi=0.95,...)
 {
 	xrange = range(min(c(x$observed,unlist(x$predicted))),max(c(x$observed,unlist(x$predicted))))	
 	
@@ -34,7 +34,7 @@ plot.pcheck <- function(x,var.names=NULL,phase.names=NULL,index=1,hpdi=0.95)
 		phase.names=x$phase.names
 		if (is.null(phase.names))
 		{
-			warning("Variable names are not supplied, using row  number instead")
+			warning("Phase names are not supplied, using row number instead")
 			phase.names = 1 + 1:nrow(x$observed)
 		}
 	}
@@ -49,7 +49,8 @@ plot.pcheck <- function(x,var.names=NULL,phase.names=NULL,index=1,hpdi=0.95)
 
 	pred=x$predicted[[index]]
 	colnames(pred)=var.names
-	hinterval = LaplacesDemon::p.interval(pred,prob=hpdi)
+	hinterval = t(apply(pred,2,quantile,prob=c((1-ppi)/2,ppi+(1-ppi)/2)))
+# 	hinterval = LaplacesDemon::p.interval(pred,prob=hpdi)
 	
 # plot credible intervals and observed frequencies
 

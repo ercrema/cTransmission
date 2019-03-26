@@ -5,7 +5,7 @@
 \title{Plot posterior predicted checks}
 \usage{
 \method{plot}{pcheck}(x, var.names = NULL, phase.names = NULL,
-  index = 1, hpdi = 0.95)
+  index = 1, ppi = 0.95, ...)
 }
 \arguments{
 \item{x}{A \code{pcheck} class object obtained using \code{link{predCheck}}.}
@@ -16,7 +16,7 @@
 
 \item{index}{Integer value indicating which sampling phase to display counting from the second observed sampling phase.}
 
-\item{hpdi}{Higher posterior interval size.}
+\item{ppi}{Prediction percentile interval. Default is 0.95.}
 }
 \description{
 Compares observed variants frequency to the expected variants frequency of the inferred transmission model.
