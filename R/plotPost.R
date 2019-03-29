@@ -28,6 +28,7 @@ plotPost<-function(x,pnames)
 				tmp=density(x[,i])
 				plot(0,0,xlim=range(tmp$x),ylim=range(tmp$y),type="n",axes=F,xlab="",ylab="")
 				polygon(c(tmp$x,rev(tmp$x)),c(tmp$y,rep(0,length(tmp$y))),col="deepskyblue3",border=NA)
+				abline(v=median(x[,i]),lty=2,lwd=1.5)
 
 				axis(1)
 				axis(2)
@@ -52,6 +53,6 @@ plotPost<-function(x,pnames)
 		}
 
 	}
-
+	par(mfrow=c(1,1))
 }
 

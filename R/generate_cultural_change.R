@@ -45,7 +45,7 @@ generate_cultural_change<-function(x, iniPop, rr, mu, params=list(b=0),model=fre
 # 	    transProb = generate_transmissionProb(nType,resmat[t,],b,mu)
 
 	    #flexible approach
-	    arguments = c(list(x=resmat[t,],mu=mu,k=nType),params)
+	    arguments = c(list(x=resmat[t,],mu=mu),params)
 	    transProb = do.call(model,arguments)
         
 

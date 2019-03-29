@@ -4,12 +4,10 @@
 \alias{frequencyBias}
 \title{Frequency Biased Transmission Model}
 \usage{
-frequencyBias(x, k, mu, b)
+frequencyBias(x, mu, b)
 }
 \arguments{
 \item{x}{Relative or absolute frequency of cultural variants.}
-
-\item{k}{Number of initial cultural variants with the last slot for mutation events (see details below).}
 
 \item{mu}{Innovation rate.}
 
