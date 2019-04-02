@@ -18,41 +18,46 @@ plotPost<-function(x,pnames)
 	nsim = nrow(x)
 	if (nsim<1000){nsim=1000}
 
-	for (i in 1:n.param)
+	quadSize = n.param*n.param
+	position = matrix(1:quadSize,n.param,n.param)
+	marginal = diag(position)
+	joint = which(lower.tri(position))
+	outer = which(upper.tri(position))
+	combinations = expand.grid(1:n.param,1:n.param)
+
+	for (i in 1:quadSize)
 	{
-		for (j in 1:n.param)
-		{
-			# Marginal Distribution
-			if (i==j)
-			{
-				tmp=density(x[,i])
-				plot(0,0,xlim=range(tmp$x),ylim=range(tmp$y),type="n",axes=F,xlab="",ylab="")
-				polygon(c(tmp$x,rev(tmp$x)),c(tmp$y,rep(0,length(tmp$y))),col="deepskyblue3",border=NA)
-				abline(v=median(x[,i]),lty=2,lwd=1.5)
-
-				axis(1)
-				axis(2)
-				mtext(pnames[i],1,line=3)
-			}
-
-			# Joint Distribution
-			if (i<j)
-			{
-				smoothScatter(x[,i],x[,j],xlab="",ylab="")
-				axis(1)
-				axis(2)
-				mtext(pnames[i],1,line=3)
-				mtext(pnames[j],2,line=3,las=2)
-			}
-
-			if (j>i)
-			{
-			        plot(0,0,type='n',axes=F,xlab='',ylab='')
-			}
-
-		}
-
+	  if (i%in%marginal)
+	  {
+	    k = which(marginal==i)
+	    tmp=density(x[,k])
+	    plot(0,0,xlim=range(tmp$x),ylim=range(tmp$y),type="n",axes=F,xlab="",ylab="")
+	    polygon(c(tmp$x,rev(tmp$x)),c(tmp$y,rep(0,length(tmp$y))),col="deepskyblue3",border=NA)
+	    abline(v=median(x[,k]),lty=2,lwd=1.5)
+	    axis(1)
+	    axis(2)
+	    mtext(pnames[k],1,line=3)
+	  }
+	  if (i%in%joint)
+	  {
+	    v = combinations[i,1]
+	    u = combinations[i,2]
+	    
+	    smoothScatter(x[,u],x[,v],xlab="",ylab="")
+	    axis(1)
+	    axis(2)
+	    mtext(pnames[u],1,line=3)
+	    mtext(pnames[v],2,line=3,las=2)
+	  }
+	  if (i%in%outer)
+	  {
+	    plot(0,0,type='n',axes=F,xlab='',ylab='')
+	  }
 	}
 	par(mfrow=c(1,1))
-}
-
+	
+	  
+	  
+	}
+	
+	
