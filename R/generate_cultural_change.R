@@ -58,17 +58,19 @@ generate_cultural_change<-function(x, iniPop, rr, mu, params=list(b=0),model=fre
 	    if (u[t]<=sum(resmat[t,]))
 	    {
 
-		    h = sample(1:nType,u[t], replace = TRUE, prob = relFreq) 
+		    # h = sample(1:nType,u[t], replace = TRUE, prob = relFreq) 
+		    h = sample(rep(1:nType,resmat[t,]),size=u[t])
 		    h = instances(h,1:nType)
 		    resmat[t+1,]= resmat[t,] - h
 
-		    while (any(resmat[t+1,]<0))
-		    {
-			    resmat[t+1,]=NA
-			    h = sample(1:nType,u[t], replace = TRUE, prob = relFreq) 
-			    h = instances(h,1:nType)
-			    resmat[t+1,]= resmat[t,] - h
-		    }
+		#     while (any(resmat[t+1,]<0))
+		#     {
+		#       print('shit happens!')
+		# 	    resmat[t+1,]=NA
+		# 	    h = sample(1:nType,u[t], replace = TRUE, prob = relFreq) 
+		# 	    h = instances(h,1:nType)
+		# 	    resmat[t+1,]= resmat[t,] - h
+		#     }
 	    }
 
 	    #Addition of v[t] variants according to probability transProb
