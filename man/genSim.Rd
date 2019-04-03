@@ -27,18 +27,21 @@ genSim(theta, x, model, mu = NULL, sMean = NULL, sVariance = NULL,
 \item{popSize}{Vector of population sizes for each sampling phase. Required if sampling fraction is not specified elsewhere.}
 }
 \description{
-Generates a function that can be used for generative inference using the \code{EasyABC} package.
+Generates an R function that can be used for generative inference.
 }
 \details{
 The argument \code{theta} should contain the name of model parameters to be inferred using Approximate Bayesian Computation. The names "r", "s", and "mu" refer specifically to replacement rate, sampling fraction, and innovation rate. All other names will be supplied to the transmission model. Notice that when executing the transmission model or using this in ABC inference the order of with which the values are supplied should match the same order provided for \code{theta}.
 }
 \examples{
 \\donotrun{
-library(EasyABC)
 dt=as.matrix(data.frame(var2=c(0,23,50),var2=c(200,180,180),var3=c(0,10,40),var4=c(320,290,270)))
 x=cFreqData(dt,timestamp = c(1,6,11), duration=c(2,3))
 sim = genSim(theta=c("s","mu","b"),x=x,model=frequencyBias,alpha=1,rMean=0.2,rVariance=0.01)
 sim(list(0.2,0.01,0))
+prior=list(prior_s=c("unif",0.3,0.5),prior_mu=c("unif",0.001,0.01),prior_b=c("normal",0,0.1))
+res = abcRej(x=x,sim.model=sim,prior=prior,nsim=1000,tol=0.1,ncore=2)
+## Using the EasyABC Package
+library(EasyABC)
 res = ABC_rejection(sim,prior=list(prior_s=c("unif",0.3,0.5),prior_mu=c("unif",0.001,0.01),prior_b=c("normal",0,0.1)),tol=0.01,nb_simul=1000) 
 }
 }
