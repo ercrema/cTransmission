@@ -21,11 +21,6 @@ w = 3.5
 is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
              "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
 knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
-library(rcarbon)
-```
-
-```{r, include = FALSE}
-devtools::load_all()
 ```
 
 # Introduction
@@ -280,7 +275,16 @@ While it is possible to devise a routine to execute such inferential framework, 
 
 ```{r,results='hide'}
 library(EasyABC)
-res = ABC_rejection(model=sim,prior=list(prior_mu=c("unif",0.001,0.01),prior_b=c("unif",-0.1,0.1)),tol=0.01,nb_simul=100000,summary_stat_target=x$target.freq) 
+prior = list(prior_mu=c("unif",0.001,0.01),prior_b=c("unif",-0.1,0.1))
+res = ABC_rejection(model=sim,prior=prior,tol=0.01,nb_simul=1000,summary_stat_target=x$target.freq) 
+```
+
+## Parallel Computing
+
+Although the `ABC_rejection` function in `EasyABC` allows for parallel processing, the actual execution does currently not work with simulation models created by the `genSim()` function. The function `abcRej()` can provide a working alternative
+
+```{r,results='hide'}
+res2 = abcRej(x=x,sim.model=sim,ncore = 3,nsim = 100000, tol = 0.01,prior=list(prior_mu=c("unif",0.001,0.01),prior_b=c("unif",-0.1,0.1)))
 ```
 
 ## Analysing the ABC output
@@ -288,13 +292,13 @@ res = ABC_rejection(model=sim,prior=list(prior_mu=c("unif",0.001,0.01),prior_b=c
 The output of the `ABC_rejection()` function contains a data.frame (`$param`) with the posterior samples. The function `plotPost()` provides a quick way to visualise both the marginal and the pairwise joint distribution of the posteriors:
 
 ```{r,fig.width=6,fig.height=6}
-plotPost(res$param,pnames = c("mu","b"))
+plotPost(res2$unadj.values,pnames = c("mu","b"))
 ```
 
 The `cTransmission` package also provides a routine for carrying out _posterior predictive checks_. This consists of making predictions using randomly selected parameters from the posterior distribution. The `predCheck()` function provides this routine, and its output can be displayed to assess whether the model output can correctly match observed variant frequencies.   
 
 ```{r,fig.width=8,fig.height=5}
-p=predCheck(x,sim,posterior=res$param)
+p=predCheck(x,sim,posterior=res2$unadj)
 
 par(mfrow=c(1,2))
 plot(p,index=1)
