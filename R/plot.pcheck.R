@@ -31,7 +31,7 @@ plot.pcheck <- function(x,var.names=NULL,phase.names=NULL,index=1,ppi=0.95,...)
 
 	if (is.null(phase.names))
 	{
-		phase.names=x$phase.names
+		phase.names=x$phase.names[-1]
 		if (is.null(phase.names))
 		{
 			warning("Phase names are not supplied, using row number instead")
