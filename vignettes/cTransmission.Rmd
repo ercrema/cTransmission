@@ -25,7 +25,13 @@ knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
 
 # Introduction
 
-The *cTransmission* package provides a framework for creating simulation models that can be used to infer &mdash via approximate bayesian computation (ABC) &mdash patterns of social learning from observed cultural frequency data. The actual inferential process can be carried out in a variety of ways; this vignette will illustrate a workflow based on the *EasyABC* package, which provides multiple flavours of ABC.
+The *cTransmission* package provides a framework for inferrring processes of cultural transmssion from observed cultural frequency data. 
+
+The inference procedure consists of two steps. First, the researcher has to develop a (non-equilibrium) generative model capturing the main cultural and demographic dynamics of the considered system. This model describes the frequency evolution of different cultural variants present in a population at given time points under an assumed cultural transmission hypothesis. Second, Bayesian techniques in form of &mdash via approximate Bayesian computation (ABC) &mdash are used to derive conclusions about which (mixtures of) transmission strategies are consistent with the observable frequency data and which are not. 
+
+The statistical inference process can be carried out in a variety of ways; this vignette will illustrate a workflow based on the *EasyABC* package, which provides multiple flavours of ABC.
+
+We stress that this inference framework is designed to analyse the temporal dynamic of cultural change, defined as the change in frequency of different variants of cultural traits. If the observed data are of a different nature, e.g. describing the continuous variation of certain attributes of cultural artefacts, such as the dimensions of an arrowhead, then researchers have to first construct a hypothesis about the relationship between temporal variation of the attribute and the cultural transmission processes considered in order to apply a similar inference procedure.
 
 We'll start by installing *cTransmission* and the *EasyABC* package:
 
@@ -43,9 +49,9 @@ library(EasyABC)
 
 # Data Preparation
 
-Simulation models generated in *cTransmission* are tailored to specific, user-provided, datasets that are used to inform several model parameters, the initial condition of the system, and the "target" used for the ABC inference. 
+In order to create a suitable data set for *cTransmission* we need: 1) A matrix containing the absolute frequencies of each cultural variant at the end of subsequent sampling phases; 2) the time-stamp of the last time step of each sampling phase; and 3) the duration of the sampling windows for all phases except the first (i.e. the number of time step preceding the the last time step of a phase that are assumed to have contributed to the observed frequencies). 
 
-In order to generate a suitable dataset for *cTransmission* we need: 1) A matrix containing the raw frequencies of each variant across multiple temporal sampling windows (sampling phases); 2) the time-stamp of the last time-step of each sampling window; and 3) the duration of the sampling windows for all phases except the first. We'll start by creating a matrix of variants frequencies:
+We'll start by creating a matrix of variants frequencies:
 
 <!-- The script below generates cultural frequency data with a weak conformist bias -->
 ```{r,eval=FALSE,echo=FALSE}
@@ -55,7 +61,6 @@ b=0.01
 r=0.2
 s=0.2
 mu=0.005
-
 
 #Setup ####
 n.phases=3
@@ -68,7 +73,7 @@ timesteps = max(timestamps) #number of timesteps
 
 output = vector("list",length=timesteps) #define output list
 counter = length(iniPop)+1 #set up counter for innovation
-output[[1]]= rep(1:length(iniPop),times=iniPop) #intial population (raw)
+output[[1]] = rep(1:length(iniPop),times=iniPop) #intial population (raw)
 
 # Simulation ####
 for (i in 2:timesteps)
@@ -120,26 +125,26 @@ obs = rbind(c(2, 4, 7, 16, 27, 44, 96, 104, 0, 0, 0, 0),
 colnames(obs) = LETTERS[1:ncol(obs)]
 ```
 
-The matrix `obs` contains the raw frequencies of `r ncol(obs)` cultural variants collected across `r nrow(obs)` sampling phases. The values of the matrix have been generated via simulation, readers interested in the details of the simulation can access the source markdown file of this document. Once we have our matrix with variants frequencies we can run the `cFreqData()` function which will create an object of class `cFreqData` data which will be required for other functions of the package:
+The matrix `obs` contains the absolute frequencies of `r ncol(obs)` cultural variants collected across `r nrow(obs)` sampling phases. The values of the matrix have been generated via simulation, readers interested in the details of the simulation can access the source markdown file of this document. Once we have our matrix with variants frequencies we can run the `cFreqData()` function which will create an object of class `cFreqData` data. This class will be required for other functions of the package:
 
 
 ```{r}
 x = cFreqData(x = obs,timestamp = c(1,30,60), duration = c(10,10))
 ```
 
-The argument `timestamp` requires a vector of numbers indicating the last timestep of each sampling phase, while the argument `duration` contains the duration of each sampling phase. This effectively implies that we are assuming that our variant frequency was the outcome of 60 transmission events or _generations_, and that our second phase is a sample of variants produced in _generations_ 21 to 30 and our third phase a sample of variants produced in generations 51 to 60. Translating calendar time (e.g. 100 years) into _generations_ is not a trivial exercise, and requires additional assumptions on the number of transmission of events over time.
+The argument `timestamp` requires a vector of numbers indicating the last timestep of each sampling phase, while the argument `duration` contains the duration of each sampling phase, i.e. the number of time step preceding the the last time step of a phase that are assumed to have contributed to the observed frequencies. This effectively implies that we are assuming that our variant frequency was the outcome of 60 transmission events or _generations_, and that our second phase is a sample of variants produced in _generations_ 21 to 30 and our third phase a sample of variants produced in generations 51 to 60. Translating calendar time (e.g. 100 years) into _generations_ is not a trivial exercise, and requires additional assumptions on the number of transmission of events over time.
 
 
-# Creating the simulation model
+# Creating the generative model
 
-Simulation models produced in `cTransmission` can be summarised in the follow steps:
+Generative models produced in `cTransmission` can be summarised in the follow steps:
 
-1. Infer population size across all time-steps assuming that observed variants are just a fraction $s$ of the population.
-2. Define the proportion of $r$ of the population engaged with cultural transmission.
-3. Infer the population frequencies of the cultural variants in the first phase
-4. Utilise a user define transmission model and associated parameters to infer the expected frequencies of cultural variants for all sampling phases except the first, taking into account sampling error and time-averaging.
+1. Determine population size across all time steps assuming that observed variants are just a fraction $s$ of the population.
+2. Define the proportion of $r$ of the population of cultural variants to be replaced in every time step.
+3. Determine the population frequencies of the cultural variants in the first phase.
+4. Construct a user define transmission model (containing a number of parameters controlling the nature and strengh of the cultural transmission processes) to model the expected frequencies of cultural variants for all sampling phases except the first conditioned on the assumed transmission process, taking into account sampling error and time-averaging.
 
-The `genSim()` function provides a wrapper for all these steps and generates a bespoke R function which can be used for ABC. The example below creates the function `sim()`:
+The `genSim()` function provides a wrapper for all these steps and generates a bespoke R function which can be used for ABC inferences. The example below creates the function `sim()`:
 
 
 ```{r}
@@ -148,14 +153,14 @@ sim = genSim(theta=c("mu","b"),x=x,model=frequencyBias,sMean=0.2,sVariance=0.05,
 
 The function requires the following arguments:
 
-* `x` The observed frequency data, timestamps, and durations (i.e. a `CFreqData` class object)
-* `sMean` the sampling fraction
+* `x` The observed frequency data, time stamps, and durations (i.e. a `CFreqData` class object)
+* `sMean` the mean sampling fraction
 * `sVariance` the uncertainty in the estimated sampling fraction. If `sVariance` is larger than 0, a random value will be sampled from a truncated normal distribution with mean `sMean`, standard deviation `sVariance` and values between 0 and 1.
-* `rMean` the replacement rate
+* `rMean` the mean replacement rate
 * `rVariance` the uncertainty of the estimated replacement rate. If `rVariance` is larger than 0, a random value will be sampled from a truncated normal distribution with mean `rMean`, standard deviation `rVariance` and values between 0 and 1.
-* `alpha` the prior for the Dirichlet 
-* `model` a transmission model
-* `theta` a vector of the names of the parameters to be estimated. 
+* `alpha` the parameter of the Dirichlet distribution. 
+* `model` the transmission model used.
+* `theta` a vector conatining the parameters to be estimated. 
 
 The resulting function reads a list of parameters values (those defined by the argument `theta`) and produces the expected frequency of cultural variants that are observed during the first phase across the remaining phases. For example:
 
@@ -163,7 +168,7 @@ The resulting function reads a list of parameters values (those defined by the a
 (res=sim(list(0.05,-0.01)))
 ```
 
-will run a `frequencyBias` transmission model with a mutation rate of 0.05 and a frequency bias of -0.01 (a mild anti-conformist bias) and generate the frequencies of the `r x$k[1]` cultural variants observed in our first phase. This can then be compared to the observed and simulated frequencies:
+will run a `frequencyBias` transmission model with an innovation rate of 0.05 and a frequency bias of -0.01 (a mild anti-conformist bias) and generate the frequencies of the `r x$k[1]` cultural variants observed in our first phase. These frequencies can then be compared to the observed frequencies:
 
 ```{r}
 #observed
@@ -178,13 +183,13 @@ Notice that the argument `theta` can also contain the sampling fraction and/or t
 sim2 = genSim(theta=c("s","mu","b"),x=x,model=frequencyBias,alpha=1,rMean=0.2,rVariance=0.05)
 ```
 
-will generate a function (`sim2()`) which would require as argument the sampling fraction `s`, the mutation rate `mu`, and the frequency bias parameter `b`. Notice that the order with which these parameters are supplied is important, as the output functions of `genSim()` cannot accept named argument.
+will generate a function (`sim2()`) which would now require as argument the sampling fraction `s`, the innovation rate `mu`, and the frequency bias parameter `b`. Notice that the order with which these parameters are supplied is important, as the output functions of `genSim()` cannot accept named argument.
 
 The next few subsections provide some further details on the internal functions of `genSim()` and [how to generate bespoke transmission models][Creating a bespoke transmission model]. Users interested in making ABC inference with the default frequency bias transmission model can skip to the section [Approximate Bayesian Computation via the *EasyABC* package].  
 
 ## Estimating Population Sizes
 
-Population size estimate is handled internally by the function `generate_popSize()` which requires as argument the observed frequencies (supplied as a `cFreqData` class object) and the parameters `sMean` and `sVariance`. The function first estimates the sampling fraction $s$ as a random draw from a truncated normal distribution with mean `sMean` and standard deviation `sVariance`. Then it estimates the population size at each sampling phase by dividing the observed sample size by $s$, and computes a linear interpolation accross all time steps. For example if we assume $s=0.2$ we would have: 
+Population size estimates for each time point of the considered time span are obtained from the function `generate_popSize()` which requires as argument the observed frequencies (supplied as a `cFreqData` class object) and the parameters `sMean` and `sVariance`. The function first estimates the sampling fraction $s$ as a random draw from a truncated normal distribution with mean `sMean` and standard deviation `sVariance`. Then it estimates the population size at the end of each sampling phase by dividing the observed sample size by $s$, and computes a linear interpolation accross all time steps of the pahases. For example if we assume $s=0.2$ we would have: 
 
 ```{r,fig.width=5,fig.height=5}
 (pop=generate_popSize(x = x,sMean = 0.2,sVariance = 0))
@@ -197,7 +202,7 @@ where `pop` is a vector with length `r length(pop)`, corresponding to the number
 
 ## Computing the number of removal/additions
 
-The `cTransmission` package accounts for the possibility that only a proportion $r$ of the population engage with cultural transmission. The `generate_removalReplacement()` function computes the number of new observations introduced (via social learning) and removed (by random selection) at each timestep. The function requires the `cFreqData` class object, the estimated population size, and the replacement rate $r$:
+The `cTransmission` package accounts for the possibility that only a proportion $r$ of the population of cultural variants is replaced in every time step. The `generate_removalReplacement()` function computes the number of cultural variants to be removed (by random sampling) and subsequently to be added (via cultural transmssion) at each timestep. The function requires the `cFreqData` class object, the estimated population size, and the replacement rate $r$:
 
 ```{r}
 rr=generate_removalReplacement(x=x,N=pop,r = 0.2)
@@ -210,7 +215,7 @@ The resulting data.frame contains the number of objects to be removed (`u`) or a
 
 ## Estimating Variants Frequencies of the first phase
 
-The observed frequency of cultural variants plays a pivotal role in the inferential process offered by `cTransmission` as it defines the initial conditions of the simulation model created by the `genSim()` function. However, the observed frequencies describe the sample and not the population of cultural variants. The `generate_initialPop()` function utilises a Dirichlet distribution approach to estimate the frequency of each cultural variant at the population level. The function requires a vector of observed frequencies and the parameter $\alpha$ of the Dirichlet distribution. Internally `genSim()` supplies a vector of $k+1$ variants, where $k$ is the number of cultural variants observed during the first phase. The additional $+1$ is a placeholder for unobserved variants.
+The observed frequencies of cultural variants in the first phase play a pivotal role in the inferential process offered by `cTransmission` as they define the initial conditions of the generative model created by the `genSim()` function. However, the observed frequencies describe the sample and not the population of cultural variants. The `generate_initialPop()` function utilises a Dirichlet distribution approach to estimate the relative frequency of each cultural variant at the population level. The function requires a vector of observed frequencies and the parameter $\alpha$ of the Dirichlet distribution. Internally `genSim()` supplies a vector of $k+1$ variants, where $k$ is the number of cultural variants observed during the first phase. The component $k+1$ is a placeholder for the estimate of the proportion of variants unobserved in the sample.
 
 ```{r}
 observedFreq=x$cfreq[1,1:x$k[1]] #extract raw frequencies of observed variant
@@ -221,7 +226,7 @@ ini = round(popFreq*pop[1]) #compute initial raw frequencies by combining estima
 
 ## Modelling cultural change
 
-Once estimates of population structure and size are estimated, expected changes in the frequency of cultural variants are computed by the `generate_cultural_change()` function. This is actually a wrapper function that combines and feeds the output of `generate_popSize()`, `generate_removalReplacement()`, and `generate_initialPop()` to a transmission model defined by the arguments `model` and `params`. The former is a function (in this case `frequencyBias()`) that reads variant frequencies and computes the probability of each variant being selected under a particular transmission model and its parameters (supplied by the argument `params` as a list). In the example below, we use a frequency biased transmission model where the magnitude and the direction of the bias is tuned by the parameter $b$ ($b<0$ for anticonformism, $b>0$ for conformism, and $b=0$ for an unbiased transmission model)
+Once population structure and size are estimated for the first phase, expected changes in frequency of cultural variants are computed by the `generate_cultural_change()` function. This is actually a wrapper function that combines and feeds the output of `generate_popSize()`, `generate_removalReplacement()`, and `generate_initialPop()` to a transmission model defined by the arguments `model` and `params`. The former is a function (in this case `frequencyBias()`) that reads variant frequencies and computes the probability of each variant being chosen for replacement under a particular transmission defined by the model parameters (supplied by the argument `params` as a list). In the example below, we use a frequency biased transmission model where the magnitude and the direction of the bias is tuned by the parameter $b$ ($b<0$ for anti-conformity, $b>0$ for conformity, and $b=0$ for an unbiased transmission model).
 
 ```{r}
 generate_cultural_change(x=x,iniPop=ini,rr=rr,mu=0.01,params=list(b=0),model=frequencyBias)
@@ -229,7 +234,7 @@ generate_cultural_change(x=x,iniPop=ini,rr=rr,mu=0.01,params=list(b=0),model=fre
 
 ### Creating a bespoke transmission model
 
-The arguments `model` and `params` provides a flexible structure, also enabling the possibility to define custom models of cultural transmission as an R function. This will need a minimum of two arguments; the relative or absolute frequency of cultural variants  `x` and the rate of innovation `mu`. The `generate_cultural_change()` will automatically supply these to values to the custom function along with any additional parameters defined in the argument `params`. The custom function should return the expected probability of selecting each of the supplied variants. 
+The arguments `model` and `params` provides a flexible structure, also enabling the possibility to define custom models of cultural transmission as an R function. This will need a minimum of two arguments; the absolute frequency of cultural variants  `x` and the rate of innovation `mu`. The `generate_cultural_change()` will automatically supply these to values to the custom function along with any additional parameters defined in the argument `params`. The custom function should return the expected probability of chosing each of the cultural variants present for replacement. 
 
 The script below provides an example of a custom function of a conformist transmission model where there is an additional probability $c$ of selecting the most common cultural variant.
 
@@ -255,7 +260,7 @@ generate_cultural_change(x=x,iniPop=ini,rr=rr,mu=0.01,params=list(C=0.1),model=c
 
 # Approximate Bayesian Computation via the *EasyABC* package
 
-The simulation model generated from the `genSim()` function enables direct comparison between observed adn expected variant frequencies under the assumption of a particular model. The figures below, for example, compares 500 estimates using $\mu=0.01$ and three different settings of $b$ ($b=0$,$b=-0.1$, and $b=0.1$).
+The generative model generated from the `genSim()` function enables direct comparison between observed variant frequencies and frequencies expected under a particular transmission process. The figures below, for example, compare 500 data sets generated by using $\mu=0.01$ and three different settings of $b$ ($b=0$,$b=-0.1$, and $b=0.1$).
 
 ```{r,fig.width=10,fig.height=4}
 par(mfrow=c(1,3))
@@ -269,9 +274,9 @@ hist(replicate(500,sim(list(0.01,-0.1))[1]),breaks=seq(0,1,0.05),border=NA,col='
 abline(v=x$target.freq[1],lty=2)
 ```
 
-The approximate Bayesian computation framework expands this notion by measuring the Euclidean distance between observed and _target_ cultural variants (i.e. the variants that were present during the first phase) for a random sample of parameter combinations drawn from user-defined _prior_ distributions. The parameters associated with the subset of simulations yielding the closest fit between observed and target frequencies becomes then the _posterior_ distribution indicating the most likely parameter combination. 
+The approximate Bayesian computation framework expands this comparison by measuring the Euclidean distance between the frequencies of simulated and observed cultural variants (i.e. the variants that were present during the first phase) for a random sample of parameter combinations drawn from user-defined _prior_ distributions. The model parameters associated with the subset of simulations yielding the closest fit between observed and target frequencies are then summarised by the _posterior_ distribution indicating the range of the parameter space that is able to produce frequency data within a given tolerance level of the observed data, and consequently the cultural transmission processes that are consistent with the data. We stress that the obtained posterior distribution is only a good approximation of the ‘true’, posterior distribution for small tolerance levels. Therefore if the obtained tolerance levels is large, and cannot be improved upon, the inferred parameter spaces are likely not meaningful. This situation may point to an inadequacy of the model, and therefore the assumed cultural transmission processes, to explain the data. The explanatory value of the obtained posterior distribution can be investigated by posterior predictive checks explained below. 
 
-While it is possible to devise a routine to execute such inferential framework, we reccomend the use of the `EasyABC` package, which provides a variety of algorithms. The example below utilises the _rejection algorithm_ which is the most basic and simpest form of ABC where users just need to define the number of simulations (`nb_simul`) and the proportion of runs with the closest fit to thedata (`tol`). As for other ABC algorithm the function would need the simulation model (`model`), a list defining the parameter priors, and the target values (`summary_stat_target`). The example below examines our dataset `x` using our `sim` model with uniform prior for `mu` ranging between 0.001 and 0.01, and a uniform prior for `b`, ranging between -0.1 and 0.1:
+To carry out this inference we use the `EasyABC` package, which provides a variety of algorithms. The example below utilises the _rejection algorithm_ which is the most basic and simplest form of ABC where users just need to define the number of simulations (`nb_simul`) and the proportion of runs with the closest fit to the data (`tol`). As for other ABC algorithm the function needs the generative model (`model`), a list defining the parameter priors, and the target values (`summary_stat_target`). The example below examines our dataset `x` using our `sim` model with uniform prior for `mu` ranging between 0.001 and 0.01, and a uniform prior for `b`, ranging between -0.1 and 0.1:
 
 ```{r,results='hide'}
 library(EasyABC)
@@ -295,7 +300,8 @@ The output of the `ABC_rejection()` function contains a data.frame (`$param`) wi
 plotPost(res2$unadj.values,pnames = c("mu","b"))
 ```
 
-The `cTransmission` package also provides a routine for carrying out _posterior predictive checks_. This consists of making predictions using randomly selected parameters from the posterior distribution. The `predCheck()` function provides this routine, and its output can be displayed to assess whether the model output can correctly match observed variant frequencies.   
+The `cTransmission` package also provides a routine for carrying out _posterior predictive checks_ to assess how well the parameter ranges specified by the posterior distribution explain the observed data. The `predCheck()` function provides this routine by sampling values of the model parameters from the (joint) posterior distribution, inserting these into the generative model and produced theoretical frequencies at the end of each phase. Repeating this procedure generates theoretical expectations of the frequency ranges for each individual variant type based on the joint posterior distribution. The comparison of the observed frequencies of each variant type with these frequency ranges allowed the explanatory power of the derived posterior distribution to be assessed. If observations are outside the theoretical expectations then the inferred cultural transmssion cannot replicate all aspects of the dynamic of cultural change, indicating a mismatch between theory and data.
+
 
 ```{r,fig.width=8,fig.height=5}
 p=predCheck(x,sim,posterior=res2$unadj)
