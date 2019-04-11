@@ -239,7 +239,7 @@ The resulting data.frame contains the number of objects to be removed (`u`) or a
 Once population structure and size are estimated for the first phase, expected changes in frequency of cultural variants are computed by the `generate_cultural_change()` function. This is actually a wrapper function that combines and feeds the output of `generate_popSize()`, `generate_removalReplacement()`, and `generate_initialPop()` to a transmission model defined by the arguments `model` and `params`. Thereby the argument `model` is a function (in our case `frequencyBias()`) that reads variant frequencies and computes the probability of each variant being chosen for replacement under a particular transmission process --- defined by the model parameters supplied by the argument `params` as a list. In the example below, we use a frequency biased transmission model where the magnitude and the direction of the bias is tuned by the parameter $b$ according to the equation:
 
 $$\pi_j = \frac{m_j^{1+b}}{\sum_{s=1}^{k}m_s^{1+b}}(1-\mu) $$
-where $\pi_j$ is the probability of selection the variant $j$, $k$ is the number of different cultural variants in the sampling pool, and $\mu$ is the rate of innovation. When $b<0$ the model portrays an anti-conformist biased transmission, when $b>0$ a conformist biased transmission, and when $b=0$ an unbiased transmission.
+where $\pi_j$ is the probability of chosing variant $j$, $m_j$ the relative frequency of variant $j$, $k$ is the number of different cultural variants, and $\mu$ is the rate of innovation. When $b<0$ the model portrays an anti-conformist biased transmission, when $b>0$ a conformist biased transmission, and when $b=0$ an unbiased transmission.
 
 ```{r}
 generate_cultural_change(x=x, iniPop=ini, rr=rr, mu=0.01, params=list(b=0), model=frequencyBias)
@@ -298,7 +298,7 @@ The example below examines our dataset `x` using our `sim` model with uniform pr
 ```{r,results='hide'}
 library(EasyABC)
 prior = list(prior_mu=c("unif",0.001,0.01), prior_b=c("unif",-0.1,0.1))
-res = ABC_rejection(model=sim, prior=prior, tol=0.01, nb_simul=100000, summary_stat_target=x$target.freq) 
+res = ABC_rejection(model=sim, prior=prior, tol=0.01, nb_simul=1000, summary_stat_target=x$target.freq) 
 ```
 
 ## Parallel Computing
