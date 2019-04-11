@@ -1,7 +1,7 @@
 Package: cTransmission
 Type: Package
 Title: An Approximate Bayesian Computation framework for inferring patterns of cultural transmission from frequency data
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: c(person("Enrico","Crema", role=c("aut","cre"),email="enrico.crema@gmail.com"),
 	     person("Anne","Kandler", role=c("aut"),email="anne_kandler@eva.mpg.de"))
 Description: This package provides a framework for analysing cultural frequency data using Approximate Bayesian Computation. 
