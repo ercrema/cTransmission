@@ -34,7 +34,7 @@ cFreqData <- function(x,timestamp,duration=1){
   timestamp=timestamp-timestamp[1]+1
  
   # Check if durations make sense
-  if (!all(diff(timestamp)>duration))
+  if (!all(diff(timestamp)>=duration))
   {
   stop("Supplied phase duration are too long")  	
   }
