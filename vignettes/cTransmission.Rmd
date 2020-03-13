@@ -92,7 +92,7 @@ for (i in 2:timesteps)
   # random removal of individuals
   output[[i]] = output[[i-1]][-sample(1:popSizes[i-1],size=toRemove)]
   # random addition of individuals 
-  p=table(output[[i-1]])/pop
+  p=table(output[[i-1]])/length(output[[i-1]])
   t=as.numeric(names(p))
   toBeAdded =  sample(t,toAdd,replace=TRUE,prob=p^(1+b)/sum(p^(1+b)))
   index = which(runif(toAdd)<mu)
