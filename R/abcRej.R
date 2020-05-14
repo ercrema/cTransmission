@@ -5,6 +5,7 @@
 #' @param prior A list of model priors. Each element of the list corresponds to a model parameter. The list element must be a vector whose first argument determines the type of prior distribution: possible values are "unif" for a uniform distribution on a segment and "normal" for a normal distribution. The following arguments of the list elements contain the characteritiscs of the prior distribution chosen: for "unif", two numbers must be given: the minimum and maximum values of the uniform distribution; for "normal", two numbers must be given: the mean and standard deviation of the normal distribution. Syntax adapted from the \code{EasyABC} package.
 #' @param nsim Number of simulations
 #' @param tol Required proportion of accepted simulations.
+#' @param raw Determines whether raw simulation output and parameters should be returned. Default is FALSE.
 #' @param ncore Number of cores for parallel processing. Default is 1.
 #' @details 
 #' @import utils
@@ -15,7 +16,7 @@
 #' @import doParallel
 #' @export
 
-abcRej<-function(x,sim.model,prior,nsim,tol,ncore=1)
+abcRej<-function(x,sim.model,prior,nsim,tol,ncore=1,raw=FALSE)
 {
 
 	#Construct prior
@@ -49,7 +50,8 @@ abcRej<-function(x,sim.model,prior,nsim,tol,ncore=1)
 
 	#ABC rejection inference
 	result=abc(x$target.freq,param,simres,tol=tol,method='rejection')
-	return(result)
+	if (!raw){return(result)}
+	if (raw){return(list(abcRes=result,simres=simres,param=param))}
 }
 
 
